@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IP Reputation Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            padding: 12px;
+            margin: 10px 0;
+            width: 100%;
+            font-size: 16px;
+        }
+        button {
+            background: #0077b5;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 IP Reputation Checker</h1>
+        <p>Check if an IP address is malicious or clean</p>
+        
+        <input type="text" id="ipInput" placeholder="Enter IP address (e.g., 8.8.8.8)">
+        <button onclick="checkIP()">Check Reputation</button>
+        
+        <div id="result" class="result"></div>
+        
+        <p style="margin-top: 30px; font-size: 14px; color: #666;">
+            Built by Asma | Cybersecurity Student
+        </p>
+    </div>
+
+    <script>
+    function checkIP() {
+        const ip = document.getElementById('ipInput').value;
+        const resultDiv = document.getElementById('result');
+        
+        // Simple validation
+        if (!ip) {
+            alert("Please enter an IP address");
+            return;
+        }
+        
+        // Show loading
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <h3>Checking ${ip}...</h3>
+            <p>🔧 This is a demo frontend</p>
+            <p>Backend integration coming soon!</p>
+            <hr>
+            <p><strong>For now:</strong></p>
+            <p>• Clone from GitHub: github.com/Asma-cybersec/Ip-Reputation-Checker</p>
+            <p>• Run: python ip_checker.py</p>
+            <p>• Use command: check ${ip}</p>
+        `;
+        
+        // Demo colors
+        const colors = ['#d4edda', '#fff3cd', '#f8d7da'];
+        resultDiv.style.background = colors[Math.floor(Math.random() * 3)];
+    }
+    </script>
+</body>
+</html>
