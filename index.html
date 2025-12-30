@@ -1,5 +1,5 @@
 <script>
-    // BACKEND URL - CHANGE THIS TO YOUR RENDER URL
+    // BACKEND URL
     const BACKEND_URL = 'https://ip-reputation-checker-j6iz.onrender.com';
     
     async function checkIP() {
@@ -38,22 +38,47 @@
                 throw new Error(data.error || data.message || 'API request failed');
             }
             
-            // Check if data has expected structure
-            if (!data || data.status === 'error') {
-                throw new Error(data.error || 'Invalid response from server');
-            }
+            // Convert backend response to frontend format
+            const processedData = processBackendData(data);
             
             // Display results
-            displayResults(data);
+            displayResults(processedData);
             
         } catch (err) {
             console.error('API Error:', err);
-            showError(`Could not check IP: ${err.message}. Try again in 30 seconds.`);
+            showError(`Could not check IP: ${err.message}`);
         } finally {
             // Hide loading
             loading.style.display = 'none';
             checkButton.disabled = false;
         }
+    }
+    
+    function processBackendData(data) {
+        // Convert backend's "threat": "✅ CLEAN" to "threatLevel": "clean"
+        let threatLevel = 'clean';
+        let emoji = '✅';
+        
+        if (data.threat && data.threat.includes('MALICIOUS')) {
+            threatLevel = 'malicious';
+            emoji = '🚨';
+        } else if (data.threat && data.threat.includes('SUSPICIOUS')) {
+            threatLevel = 'suspicious';
+            emoji = '⚠️';
+        }
+        
+        return {
+            ip: data.ip,
+            country: data.country || 'Unknown',
+            isp: data.isp || 'Unknown',
+            domain: data.domain || 'N/A',
+            score: data.score || 0,
+            reports: data.reports || 0,
+            lastReported: data.lastReported || 'Never',
+            threatLevel: threatLevel,
+            emoji: emoji,
+            status: data.status || 'success'
+        };
     }
     
     function isValidIP(ip) {
@@ -63,20 +88,6 @@
     
     function displayResults(data) {
         const result = document.getElementById('result');
-        
-        // Make sure data has required fields
-        if (!data.threatLevel) {
-            data.threatLevel = 'clean';
-        }
-        if (!data.emoji) {
-            data.emoji = '✅';
-        }
-        if (!data.country) data.country = 'Unknown';
-        if (!data.isp) data.isp = 'Unknown';
-        if (!data.domain) data.domain = 'N/A';
-        if (!data.score) data.score = 0;
-        if (!data.reports) data.reports = 0;
-        if (!data.lastReported) data.lastReported = 'Never';
         
         // Set color based on threat level
         result.className = 'result ' + data.threatLevel;
