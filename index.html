@@ -1,45 +1,224 @@
-<script>
-    const BACKEND_URL = 'https://ip-reputation-checker-j6iz.onrender.com';
-    
-    async function checkIP() {
-        const ip = document.getElementById('ipInput').value.trim();
-        const resultDiv = document.getElementById('result');
-        const errorDiv = document.getElementById('error');
-        
-        if (!ip) {
-            alert("Please enter an IP address");
-            return;
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IP Reputation Checker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        // Show loading
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = "Checking...";
-        errorDiv.style.display = 'none';
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         
-        try {
-            const response = await fetch(`${BACKEND_URL}/check?ip=${encodeURIComponent(ip)}`);
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                resultDiv.innerHTML = `
-                    <h3>Results for ${data.ip}</h3>
-                    <p>Country: ${data.country}</p>
-                    <p>ISP: ${data.isp}</p>
-                    <p>Threat Score: ${data.score}%</p>
-                    <p>${data.threat}</p>
-                `;
-            } else {
-                throw new Error(data.error || 'Unknown error');
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .input-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 18px 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            border-radius: 15px;
+            padding: 30px;
+            display: none;
+            animation: fadeIn 0.5s;
+            border: 1px solid #e0e0e0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid #c00;
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .input-section {
+                flex-direction: column;
             }
-        } catch (err) {
-            errorDiv.innerHTML = `Error: ${err.message}`;
-            errorDiv.style.display = 'block';
-            resultDiv.style.display = 'none';
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
         }
-    }
-    
-    // Add example IPs on click (simpler)
-    function setExampleIP(ip) {
-        document.getElementById('ipInput').value = ip;
-    }
-</script>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 IP Reputation Checker</h1>
+            <p>Check any IP address against AbuseIPDB threat intelligence database</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <input type="text" 
+                       id="ipInput" 
+                       placeholder="Enter IP address (e.g., 8.8.8.8 or 185.220.101.34)"
+                       onkeypress="if(event.key === 'Enter') checkIP()">
+                <button onclick="checkIP()">Check Reputation</button>
+            </div>
+            
+            <div id="error" class="error"></div>
+            
+            <div id="result" class="result"></div>
+        </div>
+        
+        <div class="footer">
+            <p>Built by Asma 🤓 | Cybersecurity Student</p>
+            <p>Powered by <a href="https://www.abuseipdb.com/" target="_blank">AbuseIPDB</a> threat intelligence</p>
+            <p>🔗 <a href="https://github.com/Asma-cybersec/Ip-Reputation-Checker" target="_blank">View CLI version on GitHub</a></p>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://ip-reputation-checker-j6iz.onrender.com';
+        
+        async function checkIP() {
+            const ip = document.getElementById('ipInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            if (!ip) {
+                alert("Please enter an IP address");
+                return;
+            }
+            
+            // Show loading
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = "Checking...";
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/check?ip=${encodeURIComponent(ip)}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <h3>Results for ${data.ip}</h3>
+                        <p><strong>Country:</strong> ${data.country}</p>
+                        <p><strong>ISP:</strong> ${data.isp}</p>
+                        <p><strong>Threat Score:</strong> ${data.score}%</p>
+                        <p><strong>Total Reports:</strong> ${data.reports}</p>
+                        <p><strong>Verdict:</strong> ${data.threat}</p>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `Error: ${err.message}`;
+                errorDiv.style.display = 'block';
+                resultDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
